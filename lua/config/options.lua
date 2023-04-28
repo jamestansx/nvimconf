@@ -10,14 +10,14 @@ opt.relativenumber = true
 opt.termguicolors = true
 opt.cursorline = true
 opt.hlsearch = true
-opt.confirm = true      -- show confirmation instead of error
+opt.confirm = true -- show confirmation instead of error
 opt.autowriteall = true -- auto save when leaving neovim
 opt.title = true
-opt.laststatus = 3      -- global status
+opt.laststatus = 3 -- global status
 opt.showtabline = 1
 opt.conceallevel = 2
 opt.concealcursor = "nc" -- this is what vimdoc used
-opt.synmaxcol = 300      -- don't syntax highlight long lines
+opt.synmaxcol = 300 -- don't syntax highlight long lines
 opt.mouse = "a"
 opt.signcolumn = "yes"
 opt.virtualedit = "block"
@@ -140,7 +140,7 @@ opt.splitkeep = "screen"
 
 -- diff mode
 opt.diffopt:append({
-  "iwhite",    -- no whitespace
+  "iwhite", -- no whitespace
   "hiddenoff", -- don't diff when buffer is hidden
   "linematch:60",
   "algorithm:histogram",

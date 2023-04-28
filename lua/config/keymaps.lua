@@ -8,7 +8,14 @@ map({ "n", "v" }, { "<Space>", "<Nop>" })
 for i = 1, 5 do
   local lhs = string.format("<M-%s>", i)
   local rhs = string.format("%s<C-w>w", i)
-  util.keymaps("n", { lhs, rhs, { desc = string.format("Move to window tag '%s'", i), noremap = true } })
+  util.keymaps(
+    "n",
+    {
+      lhs,
+      rhs,
+      { desc = string.format("Move to window tag '%s'", i), noremap = true },
+    }
+  )
 end
 
 -- jump to start and end of line with home row keys

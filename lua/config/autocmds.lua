@@ -85,7 +85,7 @@ autocmd({ "VimEnter" }, {
   callback = function(ev)
     local dir = fn.fnamemodify(ev.file, ":p:h")
     api.nvim_set_current_dir(dir:match("^drex://(.*)$") or dir)
-  end
+  end,
 })
 
 autocmd({ "BufRead", "BufNewFile" }, {
