@@ -10,14 +10,12 @@ return {
     config = function(_, opts)
       require("telescope").setup(opts)
       require("telescope").load_extension("fzf")
+      require("telescope").load_extension("ui-select")
     end,
   },
   {
     "nvim-telescope/telescope-ui-select.nvim",
     event = "UIEnter",
     dependencies = "nvim-telescope/telescope.nvim",
-    config = function()
-      require("telescope").load_extension("ui-select")
-    end
   },
 }
