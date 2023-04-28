@@ -53,14 +53,14 @@ map("c", {
     function()
       return vim.fn.wildmenumode() == 1 and "<C-n>" or "<Down>"
     end,
-    { expr = true, noremap = true },
+    { expr = true, noremap = true, silent = false },
   },
   {
     "<C-p>",
     function()
       return vim.fn.wildmenumode() == 1 and "<C-p>" or "<Up>"
     end,
-    { expr = true, noremap = true },
+    { expr = true, noremap = true, silent = false },
   },
 })
 
