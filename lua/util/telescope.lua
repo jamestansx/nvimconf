@@ -6,13 +6,7 @@ local function parse_opts(opts)
   vim.validate({ opts = { opts, "table" } })
 
   local theme = opts.theme and require("telescope.themes")["get_" .. opts.theme]
-    or nil
-  if nil == theme then
-    vim.notify(
-      string.format("Selected theme (%s) doesn't exists", opts.theme),
-      vim.log.levels.WARN
-    )
-  end
+      or nil
   return theme and theme(opts) or opts
 end
 

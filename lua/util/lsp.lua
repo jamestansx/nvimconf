@@ -16,7 +16,7 @@ function M.check_nls_sources(provider, bufnr)
   }
 
   return map[provider]
-    and #require("null-ls.sources").get_available(
+      and #require("null-ls.sources").get_available(
         vim.bo[bufnr].filetype,
         map[provider]
       )
