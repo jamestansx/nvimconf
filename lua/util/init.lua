@@ -8,6 +8,11 @@ M.augroup = function(grp, opts)
   vim.api.nvim_create_augroup("jamestansx_" .. grp, opts or { clear = true })
 end
 
+---@param plugin string
+function M.has(plugin)
+  return require("lazy.core.config").plugins[plugin] ~= nil
+end
+
 ---@param mode string | table
 ---@param lhs string
 ---@param rhs string
