@@ -30,6 +30,11 @@ function M.keymaps(mode, tbl)
     table = { tbl, "table" },
   })
 
+  if "string" == type(tbl[1]) then
+    M.keymap(mode, unpack(tbl))
+    return
+  end
+
   for _, v in pairs(tbl) do
     M.keymap(mode, unpack(v))
   end
@@ -41,7 +46,7 @@ function M.is_git_worktree(workspace)
 
   if workspace then
     workspace = vim.fn.shellescape(vim.fn.expand(workspace))
-    git_cmd = "(cd " .. workspace .. " && " .. git_cmd .. ")"
+    git_cmd = string.format("(cd %s && %s)", workspace, git_cmd)
   end
 
   vim.fn.system(git_cmd)
@@ -69,7 +74,6 @@ function M.get_python_path(workspace)
   return vim.fn.exepath("python3") or vim.fn.exepath("python") or "python"
 end
 
--- taken from:
 -- https://github.com/LazyVim/LazyVim/blob/86ac9989ea15b7a69bb2bdf719a9a809db5ce526/lua/lazyvim/util/init.lua#L163
 function M.lazy_notify()
   local notifs = {}
