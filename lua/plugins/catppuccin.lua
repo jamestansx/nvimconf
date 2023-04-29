@@ -16,7 +16,6 @@ return {
         local C = require("catppuccin.palettes").get_palette(flavor)
         return {
           CursorLine = { bg = U.darken(C.surface0, 0.64, C.base) },
-          FloatBorder = { bg = C.mantle, fg = C.blue },
           TreesitterContext = { link = "NormalFloat" },
           TreesitterContextLineNumber = { link = "NormalFloat" },
           TelescopePrompt = { link = "TelescopePromptNormal" },

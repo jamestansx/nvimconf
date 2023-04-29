@@ -2,9 +2,10 @@ local api = vim.api
 local fn = vim.fn
 local uv = vim.loop
 
-local util = require("util")
-local autocmd = util.autocmd
+local util = require("jamestansx.util")
+local autocmd = api.nvim_create_autocmd
 local augroup = util.augroup
+local map = util.keymap.map
 
 autocmd({ "TextYankPost" }, {
   desc = "Highlight text on yank",
@@ -35,7 +36,7 @@ autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
   desc = "Check if buffer were changed outside of neovim",
   group = augroup("CheckTime"),
   pattern = "*",
-  command = "checktime",
+  command = [[checktime]],
 })
 
 local togglecursorline = augroup("ToggleCursorLine")
@@ -74,7 +75,7 @@ autocmd({ "BufWritePre" }, {
   pattern = "*",
   callback = function(ev)
     local file = uv.fs_realpath(ev.match) or ev.match
-    fn.mkdir(fn.fnamemodify(file, ":p:h"), "p")
+    pcall(fn.mkdir, fn.fnamemodify(file, ":p:h"), "p")
   end,
 })
 
@@ -84,7 +85,7 @@ autocmd({ "VimEnter" }, {
   pattern = "*",
   callback = function(ev)
     local dir = fn.fnamemodify(ev.file, ":p:h")
-    api.nvim_set_current_dir(dir:match("^drex://(.*)$") or dir)
+    pcall(api.nvim_set_current_dir, dir:match("^drex://(.*)$") or dir)
   end,
 })
 
@@ -126,7 +127,7 @@ autocmd({ "FileType" }, {
   },
   callback = function(ev)
     vim.bo[ev.buf].buflisted = false
-    util.keymap("n", "q", "<Cmd>close<CR>", { buffer = ev.buf, silent = true })
+    map("n", "q", "<Cmd>close<CR>", { buffer = ev.buf, silent = true })
   end,
 })
 

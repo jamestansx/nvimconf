@@ -1,9 +1,11 @@
 local M = {}
-local util = require("util.telescope")
+local util = require("jamestansx.util.keymap")
 local t = util.map_tele
 
+---@type table
 M._keymaps = nil
 
+---@return table
 function M.get()
   if not M._keymaps then
     M._keymaps = {
@@ -11,8 +13,9 @@ function M.get()
         mode = "n",
         "<leader>ff",
         t(function()
-          return require("util").is_git_worktree() and "git_files"
-              or "find_files"
+          return require("jamestansx.util.path").is_git_worktree()
+              and "git_files"
+            or "find_files"
         end, { theme = "ivy" }),
         desc = "[F]ind [F]iles",
       },

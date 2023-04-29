@@ -1,6 +1,10 @@
+local api = vim.api
 local fn = vim.fn
 local opt = vim.opt
-local util = require("util")
+
+local util = require("jamestansx.util")
+local autocmd = api.nvim_create_autocmd
+local augroup = util.augroup
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
@@ -97,9 +101,9 @@ opt.breakindent = true
 opt.linebreak = true
 opt.showbreak = "↪···"
 opt.breakindentopt = "sbr"
-util.autocmd({ "BufEnter" }, {
+autocmd({ "BufEnter" }, {
   desc = "Set the formatoptions globally",
-  group = util.augroup("GlobalFormatOptions"),
+  group = augroup("GlobalFormatOptions"),
   pattern = "*",
   callback = function()
     vim.opt_local.formatoptions = {
@@ -171,7 +175,7 @@ opt.fillchars:append({
 })
 
 -- set vimgrep
-if 1 == vim.fn.executable("rg") then
+if 1 == fn.executable("rg") then
   opt.grepprg = "rg --vimgrep --no-heading --smart-case --hidden --glob '!.git'"
   opt.grepformat = "%f:%l:%c:%m,%f:%l:%m"
 end
@@ -185,15 +189,18 @@ if not vim.loop.fs_stat(python_path) then
         vim.notify("Failed to init virtualenv", vim.log.levels.ERROR)
         return
       end
-      fn.jobstart(python_path .. "/bin/python" .. " -m pip install pynvim", {
-        on_exit = function(_, ret)
-          if 0 ~= ret then
-            vim.notify("Failed to install pynvim", vim.log.levels.ERROR)
-            return
-          end
-          vim.g.python3_host_prog = python_path .. "/bin/python"
-        end,
-      })
+      fn.jobstart(
+        string.format("%s/bin/python -m pip install pynvim", python_path),
+        {
+          on_exit = function(_, ret)
+            if 0 ~= ret then
+              vim.notify("Failed to install pynvim", vim.log.levels.ERROR)
+              return
+            end
+            vim.g.python3_host_prog = python_path .. "/bin/python"
+          end,
+        }
+      )
     end,
   })
 else

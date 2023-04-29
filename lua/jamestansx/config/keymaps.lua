@@ -1,27 +1,24 @@
-local util = require("util")
-local map = util.keymaps
+local util = require("jamestansx.util")
+local maps = util.keymap.maps
 
 -- why not?
-map({ "n", "v" }, { "<Space>", "<Nop>" })
+maps({ "n", "v" }, { "<Space>", "<Nop>" })
 
 -- easy switching windows with numbers
 for i = 1, 5 do
   local lhs = string.format("<M-%s>", i)
   local rhs = string.format("%s<C-w>w", i)
-  util.keymaps(
-    "n",
-    {
-      lhs,
-      rhs,
-      { desc = string.format("Move to window tag '%s'", i), noremap = true },
-    }
-  )
+  maps("n", {
+    lhs,
+    rhs,
+    { desc = string.format("Move to window tag '%s'", i), noremap = true },
+  })
 end
 
 -- jump to start and end of line with home row keys
-map({ "n", "v", "s", "o" }, { { "H", "^" }, { "L", "$" } })
+maps({ "n", "v", "s", "o" }, { { "H", "^" }, { "L", "$" } })
 
-map("n", {
+maps("n", {
   -- search result centered please
   { "n", "nzzzv", { noremap = true, silent = true } },
   { "N", "Nzzzv", { noremap = true, silent = true } },
@@ -41,12 +38,12 @@ map("n", {
   { "<C-u>", "<C-u>zz" },
 })
 
-map("x", {
+maps("x", {
   { ">", ">gv", { noremap = true } },
   { "<", "<gv", { noremap = true } },
 })
 
-map("c", {
+maps("c", {
   -- https://github.com/mhinz/vim-galore#saner-command-line-history
   {
     "<C-n>",
@@ -64,14 +61,14 @@ map("c", {
   },
 })
 
-map("i", {
+maps("i", {
   { "<C-h>", "<Left>", { noremap = true, silent = true } },
   { "<C-j>", "<Down>", { noremap = true, silent = true } },
   { "<C-k>", "<Up>", { noremap = true, silent = true } },
   { "<C-l>", "<Right>", { noremap = true, silent = true } },
 })
 
-map("t", {
+maps("t", {
   {
     "<C-Esc>",
     "<C-\\><C-n>",

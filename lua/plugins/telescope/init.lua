@@ -11,7 +11,6 @@ return {
     opts = function()
       return {
         defaults = {
-          winblend = vim.o.winblend,
           dynamic_preview_title = true,
           vimgrep_arguments = {
             "rg",
