@@ -84,6 +84,9 @@ autocmd({ "VimEnter" }, {
   group = augroup("AutoCwd"),
   pattern = "*",
   callback = function(ev)
+    if "directory" ~= fn.isdirectory(fn.expand(ev.file)) then
+      return
+    end
     local dir = fn.fnamemodify(ev.file, ":p:h")
     pcall(api.nvim_set_current_dir, dir:match("^drex://(.*)$") or dir)
   end,
