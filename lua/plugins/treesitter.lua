@@ -24,6 +24,7 @@ return {
       ensure_installed = {
         "lua",
         "c",
+        "html",
         "python",
         "query",
         "rust",

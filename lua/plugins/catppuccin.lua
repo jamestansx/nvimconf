@@ -18,14 +18,33 @@ return {
           CursorLine = { bg = U.darken(C.surface0, 0.64, C.base) },
           TreesitterContext = { link = "NormalFloat" },
           TreesitterContextLineNumber = { link = "NormalFloat" },
-          TelescopePrompt = { link = "TelescopePromptNormal" },
           HarpoonWindow = { fg = C.text, bg = C.base },
           HarpoonBorder = { fg = C.blue, bg = C.base },
           DapUIFloatBorder = { fg = C.sky, bg = C.base },
           DapUIFloatNormal = { link = "NormalFloat" },
-          NvimTreePopup = { link = "NormalFloat" },
         }
       end,
+    },
+    integrations = {
+      mini = true,
+      native_lsp = {
+        enabled = true,
+        virtual_text = {
+          errors = { "italic" },
+          hints = { "italic" },
+          warnings = { "italic" },
+          information = { "italic" },
+        },
+        underlines = {
+          errors = { "undercurl" },
+          hints = { "undercurl" },
+          warnings = { "undercurl" },
+          information = { "undercurl" },
+        },
+      },
+      telescope = true,
+      treesitter = true,
+      treesitter_context = true,
     },
   },
   config = function(_, opts)

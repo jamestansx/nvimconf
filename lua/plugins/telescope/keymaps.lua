@@ -22,7 +22,7 @@ function M.get()
       {
         mode = "n",
         "<leader>fh",
-        t("help_tags"),
+        t("help_tags", { theme = "ivy" }),
         desc = "[F]ind [H]elp",
       },
       {
@@ -43,6 +43,12 @@ function M.get()
           previewer = false,
         }),
         desc = "[F]ind by [G]rep",
+      },
+      {
+        mode = "n",
+        "<leader>,",
+        t("buffers"),
+        desc = "Find Buffers",
       },
     }
   end
