@@ -24,11 +24,15 @@ local function traverse_child(parent, marker, filematch)
   for _, p in ipairs(marker) do
     for _, m in
       ipairs(
-        vim.fn.glob(path.join(path.escape_wildcards(parent), p, filematch))
+        vim.fn.glob(
+          path.join(path.escape_wildcards(parent), p, filematch),
+          true,
+          true
+        )
       )
     do
       if path.exists(m) then
-        return m
+        return vim.fn.fnamemodify(m, ":p:h")
       end
     end
   end
@@ -62,15 +66,16 @@ function M.get_python_path(workspace, opts)
 
   workspace = workspace or vim.api.nvim_buf_get_name(0)
   workspace = vim.loop.fs_realpath(workspace)
+  workspace = vim.fn.fnamemodify(workspace, ":p:h")
 
   result = traverse_child(workspace, opts.glob_pattern, "pyvenv.cfg")
-  local is_git_workspace = M.is_git_workspace()
-  if not result and is_git_workspace then
+  local is_git = M.is_git_worktree()
+  if not result and is_git then
     workspace = lsp_util.find_git_ancestor(workspace)
     result = traverse_child(workspace, opts.glob_pattern, "pyvenv.cfg")
   end
 
-  if not result and not is_git_workspace then
+  if not result and not is_git then
     result =
       vim.fs.find(opts.venv_folder, { path = workspace, upward = true })[1]
   end
