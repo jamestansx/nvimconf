@@ -147,7 +147,14 @@ return {
       },
     },
     extensions = {
-      --"drex",
+      "lazy",
+      "man",
+      "nvim-dap-ui",
+      "quickfix",
+      "drex",
+      --"overseer",
+      --"toggleterm",
+      --"trouble",
     },
   },
 }
