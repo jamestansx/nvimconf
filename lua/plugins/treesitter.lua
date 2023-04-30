@@ -2,7 +2,7 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     version = false,
-    event = "BufReadPost",
+    event = { "BufReadPost", "BufNewFile" },
     build = ":TSUpdate",
     dependencies = {
       "nvim-treesitter/playground",

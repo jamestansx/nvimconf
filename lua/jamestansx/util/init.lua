@@ -1,6 +1,7 @@
 local M = {
   keymap = require("jamestansx.util.keymap"),
   path = require("jamestansx.util.path"),
+  lsp = require("jamestansx.util.lsp"),
 }
 
 local api = vim.api

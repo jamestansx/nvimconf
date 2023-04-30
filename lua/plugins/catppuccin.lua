@@ -1,5 +1,4 @@
-local flavor = "mocha"
-vim.g.__catppuccin_flavor = flavor
+vim.g.catppuccin_flavor = "mocha"
 
 return {
   "catppuccin/nvim",
@@ -7,13 +6,13 @@ return {
   lazy = false,
   priority = 1000,
   opts = {
-    flavor = flavor,
     transparent_background = true,
     term_colors = true,
     highlight_overrides = {
       all = function()
         local U = require("catppuccin.utils.colors")
-        local C = require("catppuccin.palettes").get_palette(flavor)
+        local C =
+          require("catppuccin.palettes").get_palette(vim.g.catppuccin_flavor)
         return {
           CursorLine = { bg = U.darken(C.surface0, 0.64, C.base) },
           TreesitterContext = { link = "NormalFloat" },
@@ -26,7 +25,14 @@ return {
       end,
     },
     integrations = {
+      cmp = true,
+      fidget = true,
+      mason = true,
       mini = true,
+      navic = {
+        enabled = true,
+        custom_bg = "NONE",
+      },
       native_lsp = {
         enabled = true,
         virtual_text = {
