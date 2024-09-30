@@ -12,7 +12,7 @@ local lsp_client_complete = function()
     return C
 end
 
-local lsp_restart = function(kwargs)
+command("LspRestart", function(kwargs)
     local bufnr = api.nvim_get_current_buf()
     local name = kwargs.fargs[1]
     local clients = lsp.get_clients({
@@ -48,9 +48,9 @@ local lsp_restart = function(kwargs)
             timer:close()
         end
     end))
-end
+end, { nargs = "*", complete = lsp_client_complete, bang = true })
 
-local lsp_stop = function(kwargs)
+command("LspStop", function(kwargs)
     local bufnr = api.nvim_get_current_buf()
     local name = kwargs.fargs[1]
     local clients = lsp.get_clients({
@@ -61,27 +61,12 @@ local lsp_stop = function(kwargs)
     for i = 1, #clients do
         clients[i].stop(kwargs.bang)
     end
-end
+end, { nargs = "*", complete = lsp_client_complete, bang = true })
 
-local lsp_info = function()
+command("LspInfo", function()
     vim.cmd([[botright checkhealth vim.lsp]])
-end
+end, {})
 
-local lsp_log = function()
+command("LspLog", function()
     vim.cmd(string.format("tabnew %s", lsp.get_log_path()))
-end
-
-command("LspRestart", lsp_restart, {
-    nargs = "*",
-    complete = lsp_client_complete,
-    bang = true,
-})
-
-command("LspStop", lsp_stop, {
-    nargs = "*",
-    complete = lsp_client_complete,
-    bang = true,
-})
-
-command("LspInfo", lsp_info, {})
-command("LspLog", lsp_log, {})
+end, {})
