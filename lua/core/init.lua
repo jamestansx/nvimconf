@@ -1,0 +1,332 @@
+local api, fn, lsp, opt = vim.api, vim.fn, vim.lsp, vim.opt
+local autocmd = api.nvim_create_autocmd
+local augroup = api.nvim_create_augroup
+local map = vim.keymap.set
+
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
+
+vim.g.loaded_node_provider = 0
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_ruby_provider = 0
+vim.g.loaded_python3_provider = 0
+
+augroup("core", { clear = true })
+
+-- bootstrap lazy.nvim
+local lazy_path = table.concat({ fn.stdpath("data"), "/lazy/lazy.nvim" })
+if not vim.uv.fs_stat(lazy_path) then
+    vim.system({
+        "git",
+        "clone",
+        "--filter=blob:none",
+        "--branch=stable",
+        "https://github.com/folke/lazy.nvim.git",
+        lazy_path,
+    }):wait()
+end
+opt.rtp:prepend(lazy_path)
+
+----------
+-- options
+----------
+opt.completeopt = "menu,menuone,noselect"
+opt.confirm = true
+opt.exrc = true -- automatically execute .nvim.lua
+opt.hlsearch = false
+opt.isfname:append("@-@") -- treat '@' as part of file name
+opt.jumpoptions:append("stack,view")
+opt.laststatus = 3 -- global statusline
+opt.mousemodel = "extend" -- right click extends selection
+opt.number = true
+opt.pumheight = 5
+opt.relativenumber = true
+opt.shada = { "'10", "<0", "s10", "h", "/10", "r/tmp" }
+opt.shiftround = true -- indent by N * vim.o.shiftwidth
+opt.showmode = false
+opt.signcolumn = "yes:1"
+opt.termguicolors = true
+opt.undofile = true
+opt.virtualedit = "block" -- allow to extend cursors to void text area
+opt.wildcharm = (""):byte() --  to trigger completion on cmdline mapping
+opt.wildoptions:remove("pum") -- disable popup menu, use list in statusline
+opt.wrap = false
+
+opt.shortmess:append({
+    I = true, -- hide default startup screen
+    A = true, -- ignore swap warning message
+    c = true, -- disable completion message
+    a = true, -- shorter message format
+})
+
+opt.list = true
+opt.listchars = {
+    nbsp = "⦸",     -- U+29B8
+    extends = "→",  -- U+2192
+    precedes = "←", -- U+2190
+    tab = "▹ ",    -- U+25B9
+    trail = "·",    -- U+00B7
+}
+
+opt.diffopt:append({
+    "algorithm:histogram",
+    "indent-heuristic",
+    "linematch:60",
+})
+
+-- better scroll
+opt.scrolloff = 6
+opt.sidescroll = 6
+opt.sidescrolloff = 6
+
+-- transparent popup
+opt.pumblend = 10
+opt.winblend = 10
+
+-- persistent window splits
+opt.splitbelow = true
+opt.splitright = true
+
+-- better search n replace behaviour
+opt.ignorecase = true -- \C to disable case-insensitive behaviour
+opt.inccommand = "split" -- show preview of replace command
+opt.smartcase = true
+
+if vim.fn.executable("rg") == 1 then
+    opt.grepprg = "rg --no-heading --smart-case --vimgrep"
+    opt.grepformat = {
+        "%f:%l:%c:%m",
+        "%f:%l:%m",
+    }
+end
+
+vim.diagnostic.config({
+    severity_sort = true,
+    jump = {
+        float = true,
+    },
+})
+
+autocmd("FileType", {
+    group = "core",
+    callback = function()
+        opt.formatoptions:remove("o")
+    end,
+})
+
+---------------
+-- autocommands
+---------------
+autocmd("TextYankPost", {
+    group = "core",
+    callback = function()
+        vim.highlight.on_yank({ timeout = 69 })
+    end,
+})
+
+autocmd("BufReadPost", {
+    group = "core",
+    callback = function()
+        local exclude = { "gitcommit", "gitrebase", "help" }
+        if vim.tbl_contains(exclude, vim.bo.ft) then
+            return
+        end
+
+        local m = api.nvim_buf_get_mark(0, '"')
+        if m[1] > 0 and m[1] <= api.nvim_buf_line_count(0) then
+            pcall(api.nvim_win_set_cursor, 0, m)
+        end
+    end,
+})
+
+autocmd("BufNewFile", {
+    group = "core",
+    callback = function()
+        autocmd("BufWritePre", {
+            group = "core",
+            buffer = 0,
+            once = true,
+            callback = function(ev)
+                -- ignore uri pattern
+                if ev.match:match([[^%w+://]]) then
+                    return
+                end
+
+                local f = vim.uv.fs_realpath(ev.match) or ev.match
+                fn.mkdir(fn.fnamemodify(f, ":p:h"), "p")
+            end,
+        })
+    end,
+})
+
+autocmd("FileType", {
+    group = "core",
+    pattern = {
+        "checkhealth",
+        "qf",
+        "help",
+    },
+    callback = function()
+        vim.keymap.set("n", "q", "<cmd>bdelete<cr>", {
+            buffer = 0,
+            nowait = true,
+        })
+    end,
+})
+
+----------
+-- keymaps
+----------
+map("n", "n", "nzz")
+map("n", "N", "Nzz")
+map("n", "*", "*zz")
+map("n", "#", "#zz")
+
+-- https://github.com/mhinz/vim-galore#saner-command-line-history
+map("c", "<c-n>", [[wildmenumode() == 1 ? "<c-n>" : "\<down\>"]], { expr = true })
+map("c", "<c-p>", [[wildmenumode() == 1 ? "<c-p>" : "\<up\>"]], { expr = true })
+
+------
+-- lsp
+------
+local lspconfig = function(name, args)
+    if args.enabled == false then
+        return
+    end
+
+    augroup("core.lsp", { clear = false })
+    autocmd("FileType", {
+        group = "core.lsp",
+        pattern = args.filetypes,
+        callback = function(ev)
+            if vim.bo[ev.buf].buftype == "nofile" then
+                return
+            end
+
+            if (args.cmd) == "function" then
+                vim.notify("TODO: Support function for lsp cmd", vim.log.levels.WARN)
+                return
+            end
+
+            args.name = name
+
+            args.capabilities = lsp.protocol.make_client_capabilities()
+
+            args.markers = args.markers or {}
+            args.markers[#args.markers + 1] = ".git"
+            args.root_dir = vim.fs.root(ev.buf, args.markers)
+
+
+            lsp.log.set_format_func(vim.inspect)
+            lsp.start(args)
+        end,
+    })
+end
+
+autocmd("LspAttach", {
+    group = "core",
+    callback = function(ev)
+        local buf = ev.buf
+        local id = ev.data.client_id
+        local handlers = lsp.handlers
+
+        handlers["textDocument/signatureHelp"] = lsp.with(handlers.signature_help, {
+            anchor_bias = "above",
+        })
+        handlers["textDocument/hover"] = lsp.with(handlers.hover, {
+            anchor_bias = "above",
+        })
+    end,
+})
+
+lspconfig("dartls", {
+    cmd = { "fvm", "dart", "language-server", "--protocol=lsp" },
+    filetypes = "dart",
+    markers = { "pubspec.yaml" },
+    init_options = {
+        onlyAnalyzeProjectsWithOpenFiles = true,
+        suggestFromUnimportedLibraries = true,
+    },
+    settings = {
+        dart = {
+            completeFunctionCalls = true,
+            showTodos = false,
+        },
+    },
+})
+
+----------
+-- plugins
+----------
+vim.cmd([[packadd cfilter]])
+
+local spec = {
+    {
+        "rebelot/kanagawa.nvim",
+        lazy = false,
+        priority = 1000,
+        config = function()
+            require("kanagawa").setup({
+                theme = "dragon",
+                background = { dark = "dragon" },
+                compile = true,
+                transparent = true,
+
+                overrides = function(C)
+                    local T = C.theme
+                    local P = C.palette
+
+                    return {
+                        -- dark completion menu
+                        Pmenu = {
+                            fg = T.ui.shade0,
+                            bg = T.ui.bg_p1,
+                            blend = vim.o.pumblend,
+                        },
+                        PmenuSel = { fg = "NONE", bg = T.ui.bg_p2 },
+                        PmenuSbar = { bg = T.ui.bg_m1 },
+                        PmenuThumb = { bg = T.ui.bg_p2 },
+
+                        Boolean = { bold = false },
+                    }
+                end,
+            })
+
+            vim.cmd.colorscheme("kanagawa")
+        end,
+    },
+}
+
+require("lazy").setup({
+    spec = spec,
+    install = {
+        colorscheme = { "kanagawa-dragon" },
+    },
+    checker = { enabled = false },
+    change_detection = { notify = false },
+    performance = {
+        rtp = {
+            disabled_plugins = {
+                "tutor",
+                "rplugin",
+                "gzip",
+                "tarPlugin",
+                "zipPlugin",
+                "spellfile",
+            },
+        },
+    },
+})
+
+-- colorcolumn = "+1"
+-- cmdheight = 2
+-- redrawtime = 1000
+-- timeoutlen = 500
+-- ttimeoutlen = 10
+-- updatetime = 1000
+-- vim.opt.wildignore:append({
+--     "*.lock", "*cache", "*.swp",
+--     "*.pyc", "*.pycache", "*/__pycache__/*",
+--     "*/node_modules/*", "*.min.js",
+--     "*.o", "*.obj", "*~",
+-- })
