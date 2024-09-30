@@ -167,6 +167,8 @@ autocmd("FileType", {
         "help",
     },
     callback = function()
+        -- perhaps remove this mapping.
+        -- use <c-w><c-q> or :bd instead
         vim.keymap.set("n", "q", "<cmd>bdelete<cr>", {
             buffer = 0,
             nowait = true,
