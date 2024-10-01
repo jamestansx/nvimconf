@@ -52,6 +52,13 @@ opt.wildcharm = (""):byte() --  to trigger completion on cmdline mapping
 opt.wildoptions:remove("pum") -- disable popup menu, use list in statusline
 opt.wrap = false
 
+-- vim.opt.wildignore:append({
+--     "*.lock", "*cache", "*.swp",
+--     "*.pyc", "*.pycache", "*/__pycache__/*",
+--     "*/node_modules/*", "*.min.js",
+--     "*.o", "*.obj", "*~",
+-- })
+
 opt.shortmess:append({
     I = true, -- hide default startup screen
     A = true, -- ignore swap warning message
@@ -213,6 +220,8 @@ local lspconfig = function(name, args)
             args.name = name
 
             args.capabilities = lsp.protocol.make_client_capabilities()
+            local capabilities = require("cmp_nvim_lsp").default_capabilities()
+            args.capabilities = vim.tbl_deep_extend("force", args.capabilities, capabilities)
 
             args.markers = args.markers or {}
             args.markers[#args.markers + 1] = ".git"
@@ -262,6 +271,19 @@ lspconfig("dartls", {
 ----------
 vim.cmd([[packadd cfilter]])
 
+local get_bufnrs = function()
+    local buf = api.nvim_get_current_buf()
+    local loc = api.nvim_buf_line_count(buf)
+    local size = api.nvim_buf_get_offset(buf, loc)
+
+    -- only source buffer with size below 1MB
+    if size <= 1048576 then
+        return { buf }
+    end
+
+    return {}
+end
+
 local spec = {
     {
         "rebelot/kanagawa.nvim",
@@ -297,6 +319,50 @@ local spec = {
             vim.cmd.colorscheme("kanagawa")
         end,
     },
+    {
+        "hrsh7th/nvim-cmp",
+        version = false,
+        -- event = "InsertEnter",
+        -- cmd = { "CmpStatus" },
+        dependencies = {
+            "hrsh7th/cmp-buffer",
+            "hrsh7th/cmp-path",
+            "hrsh7th/cmp-nvim-lsp",
+        },
+        config = function()
+            local cmp = require("cmp")
+            local mapping = cmp.mapping
+
+            cmp.setup({
+                snippet = {
+                    expand = function(args)
+                        vim.snippet.expand(args.body)
+                    end,
+                },
+                mapping = mapping.preset.insert({
+                    ["<c-e>"] = mapping.abort(),
+                    ["<c-y>"] = mapping.confirm({ select = true }),
+                    ["<cr>"] = mapping.confirm({ select = false }),
+                    ["<c-u>"] = mapping.scroll_docs(-5),
+                    ["<c-d>"] = mapping.scroll_docs(5),
+                }),
+                sources = cmp.config.sources({
+                    { name = "nvim_lsp" },
+                }, {
+                    { name = "path" },
+                    {
+                        name = "buffer",
+                        option = {
+                            get_bufnrs = get_bufnrs,
+                        },
+                    },
+                }),
+                experimental = {
+                    ghost_text = true,
+                },
+            })
+        end,
+    },
 }
 
 require("lazy").setup({
@@ -319,16 +385,3 @@ require("lazy").setup({
         },
     },
 })
-
--- colorcolumn = "+1"
--- cmdheight = 2
--- redrawtime = 1000
--- timeoutlen = 500
--- ttimeoutlen = 10
--- updatetime = 1000
--- vim.opt.wildignore:append({
---     "*.lock", "*cache", "*.swp",
---     "*.pyc", "*.pycache", "*/__pycache__/*",
---     "*/node_modules/*", "*.min.js",
---     "*.o", "*.obj", "*~",
--- })
