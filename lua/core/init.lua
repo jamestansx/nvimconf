@@ -284,6 +284,15 @@ local get_bufnrs = function()
     return {}
 end
 
+_G.oil_winbar = function()
+    local dir = require("oil").get_current_dir()
+    if dir then
+        return fn.fnamemodify(dir, ":~")
+    else
+        return api.nvim_buf_get_name(0)
+    end
+end
+
 local spec = {
     {
         "rebelot/kanagawa.nvim",
@@ -322,8 +331,8 @@ local spec = {
     {
         "hrsh7th/nvim-cmp",
         version = false,
-        -- event = "InsertEnter",
-        -- cmd = { "CmpStatus" },
+        event = "InsertEnter",
+        cmd = { "CmpStatus" },
         dependencies = {
             "hrsh7th/cmp-buffer",
             "hrsh7th/cmp-path",
@@ -373,6 +382,25 @@ local spec = {
             vim.g.undotree_ShortIndicators = 1
             vim.g.undotree_SetFocusWhenToggle = 1
             vim.g.undotree_HelpLine = 0
+        end,
+    },
+    {
+        "stevearc/oil.nvim",
+        lazy = false,
+        config = function()
+            map("n", "-", "<cmd>Oil<cr>")
+
+            require("oil").setup({
+                view_options = {
+                    show_hidden = true,
+                    is_always_hidden = function(name, bufnr)
+                        return name == ".."
+                    end
+                },
+                win_options = {
+                    winbar = [[%!v:lua.oil_winbar()]]
+                }
+            })
         end,
     },
 }
