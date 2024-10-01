@@ -186,10 +186,23 @@ autocmd("FileType", {
 ----------
 -- keymaps
 ----------
+-- center search results
 map("n", "n", "nzz")
 map("n", "N", "Nzz")
 map("n", "*", "*zz")
 map("n", "#", "#zz")
+
+-- home row
+map({ "n", "x", "o" }, "H", "^")
+map({ "n", "x", "o" }, "L", "$")
+
+-- join line without moving cursors
+map("n", "J", "mzJ`z")
+map("n", "gJ", "mzgJ`z")
+
+-- shift lines without exiting visual line
+map("x", "<", "<gv")
+map("x", ">", ">gv")
 
 -- https://github.com/mhinz/vim-galore#saner-command-line-history
 map("c", "<c-n>", [[wildmenumode() == 1 ? "<c-n>" : "\<down\>"]], { expr = true })
@@ -378,10 +391,9 @@ local spec = {
             { "you", vim.cmd.UndotreeToggle, mode = "n" },
         },
         init = function()
-            vim.g.undotree_WindowLayout = 2
-            vim.g.undotree_ShortIndicators = 1
-            vim.g.undotree_SetFocusWhenToggle = 1
             vim.g.undotree_HelpLine = 0
+            vim.g.undotree_SetFocusWhenToggle = 1
+            vim.g.undotree_ShortIndicators = 1
         end,
     },
     {
@@ -402,6 +414,20 @@ local spec = {
                 }
             })
         end,
+    },
+    {
+        "stevearc/conform.nvim",
+        lazy = true,
+        cmd = { "ConformInfo" },
+        init = function()
+            opt.formatexpr = [[v:lua.require("conform").formatexpr()]]
+        end,
+        opts = {
+            formatters_by_ft = {
+                ["_"] = { "trim_whitespace" },
+            },
+            log_level = vim.log.levels.ERROR,
+        },
     },
 }
 
