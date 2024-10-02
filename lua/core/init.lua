@@ -306,6 +306,19 @@ _G.oil_winbar = function()
     end
 end
 
+-- list of plugins that I (might) need:
+-- picker
+-- neorg
+-- harpoon
+-- multicursor (align)
+-- lsp progress
+-- statusline
+-- git (mini.git?)
+-- leap.nvim
+-- linter
+-- quickfix stevearc
+-- dadbod dbui
+-- diffview
 local spec = {
     {
         "rebelot/kanagawa.nvim",
@@ -356,6 +369,9 @@ local spec = {
             local mapping = cmp.mapping
 
             cmp.setup({
+                completion = {
+                    keyword_length = 2,
+                },
                 snippet = {
                     expand = function(args)
                         vim.snippet.expand(args.body)
@@ -374,6 +390,7 @@ local spec = {
                     { name = "path" },
                     {
                         name = "buffer",
+                        keyword_length = 4,
                         option = {
                             get_bufnrs = get_bufnrs,
                         },
@@ -451,3 +468,13 @@ require("lazy").setup({
         },
     },
 })
+
+-- TODO:
+-- keymap set quickfix diagnostic
+-- keymap revisit and leverage <leader> key
+-- keymap lsp gr*
+-- keymap window resize with count
+    -- set("n", "<M-,>", "<c-w>5<")
+    -- set("n", "<M-.>", "<c-w>5>")
+    -- set("n", "<M-t>", "<C-W>+")
+    -- set("n", "<M-s>", "<C-W>-")
