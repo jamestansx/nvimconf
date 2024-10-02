@@ -139,6 +139,7 @@ autocmd("BufReadPost", {
             return
         end
 
+        -- restore last cursor location
         local m = api.nvim_buf_get_mark(0, '"')
         if m[1] > 0 and m[1] <= api.nvim_buf_line_count(0) then
             pcall(api.nvim_win_set_cursor, 0, m)
@@ -216,9 +217,8 @@ local lspconfig = function(name, args)
         return
     end
 
-    augroup("core.lsp", { clear = false })
     autocmd("FileType", {
-        group = "core.lsp",
+        group = "core",
         pattern = args.filetypes,
         callback = function(ev)
             if vim.bo[ev.buf].buftype == "nofile" then
@@ -232,14 +232,13 @@ local lspconfig = function(name, args)
 
             args.name = name
 
-            args.capabilities = lsp.protocol.make_client_capabilities()
-            local capabilities = require("cmp_nvim_lsp").default_capabilities()
-            args.capabilities = vim.tbl_deep_extend("force", args.capabilities, capabilities)
+            local capabilities = lsp.protocol.make_client_capabilities()
+            local cmp_capabilities = require("cmp_nvim_lsp").default_capabilities()
+            args.capabilities = vim.tbl_deep_extend("force", capabilities, cmp_capabilities)
 
             args.markers = args.markers or {}
             args.markers[#args.markers + 1] = ".git"
             args.root_dir = vim.fs.root(ev.buf, args.markers)
-
 
             lsp.log.set_format_func(vim.inspect)
             lsp.start(args)
